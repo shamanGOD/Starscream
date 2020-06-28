@@ -33,24 +33,24 @@ public class NativeEngine: NSObject, Engine, URLSessionDataDelegate, URLSessionW
         stop(closeCode: UInt16(URLSessionWebSocketTask.CloseCode.abnormalClosure.rawValue))
     }
 
-    public func write(string: String, completion: (() -> ())?) {
+    public func write(string: String, completion: ((Error?) -> ())?) {
         task?.send(.string(string), completionHandler: { (error) in
-            completion?()
+            completion?(error)
         })
     }
 
-    public func write(data: Data, opcode: FrameOpCode, completion: (() -> ())?) {
+    public func write(data: Data, opcode: FrameOpCode, completion: ((Error?) -> ())?) {
         switch opcode {
         case .binaryFrame:
             task?.send(.data(data), completionHandler: { (error) in
-                completion?()
+                completion?(error)
             })
         case .textFrame:
             let text = String(data: data, encoding: .utf8)!
             write(string: text, completion: completion)
         case .ping:
             task?.sendPing(pongReceiveHandler: { (error) in
-                completion?()
+                completion?(error)
             })
         default:
             break //unsupported
